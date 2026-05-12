@@ -24,8 +24,8 @@
       overflow:hidden;
     }
 
-    .senku{
-      width: 280px;
+    .suika{
+      width: 120px;
       height: 200px;
     }
 
@@ -292,10 +292,11 @@
     <div class="modal-box">
       <h2>🔓 ACESSO LIBERADO</h2>
       <br>
-      <img class="senku" src="img/senku.png"></img>
+      <img class="suika" src="img/suika.webp"></img>
       <p>
         O cofre foi desbloqueado com sucesso.
       </p>
+      <p>Tempo decorrido: <strong id="modalTimer">00:00:00</strong></p>
       <a href="Cofre.html">
       <button class="close-btn" onclick="closeModal()">
         Fechar
@@ -367,6 +368,9 @@
         message.textContent = "Cofre desbloqueado!";
 
         safe.classList.add("open");
+
+        // Atualiza o timer na modal antes de abrir
+        document.getElementById("modalTimer").textContent = document.getElementById("timer").textContent;
 
         // ABRIR MODAL
         setTimeout(() => {
