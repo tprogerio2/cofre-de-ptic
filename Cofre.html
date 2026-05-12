@@ -1,0 +1,402 @@
+
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Cofre Digital</title>
+
+  <style>
+    *{
+      margin:0;
+      padding:0;
+      box-sizing:border-box;
+      font-family: Arial, Helvetica, sans-serif;
+    }
+
+    body{
+      height:100vh;
+      display:flex;
+      justify-content:center;
+      align-items:center;
+      background:
+        radial-gradient(circle at top, #444, #111);
+      overflow:hidden;
+    }
+
+    .senku{
+      width: 280px;
+      height: 200px;
+    }
+
+    .safe{
+      width:420px;
+      height:420px;
+      border-radius:50%;
+      background:
+        radial-gradient(circle at 30% 30%, #777, #2d2d2d 70%);
+      border:12px solid #8d8d8d;
+      position:relative;
+      box-shadow:
+        inset 0 0 20px #000,
+        0 0 40px rgba(0,0,0,0.8);
+      transition:1s;
+    }
+
+    .safe::before{
+      content:"";
+      position:absolute;
+      inset:25px;
+      border-radius:50%;
+      border:6px solid #999;
+      box-shadow: inset 0 0 10px #000;
+    }
+
+    .panel{
+      position:absolute;
+      top:50%;
+      left:50%;
+      transform:translate(-50%, -50%);
+      width:260px;
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      gap:18px;
+    }
+
+    .title{
+      color:#fff;
+      font-size:22px;
+      letter-spacing:3px;
+      text-shadow:0 0 10px #000;
+      align-content: center;
+      text-align: center;
+    }
+
+    .display{
+      width:100%;
+      height:55px;
+      border:none;
+      border-radius:10px;
+      background:#111;
+      color:#00ff90;
+      text-align:center;
+      font-size:26px;
+      letter-spacing:8px;
+      outline:none;
+      box-shadow:
+        inset 0 0 10px #000,
+        0 0 10px rgba(0,255,120,0.3);
+    }
+
+    .keyboard{
+      display:grid;
+      grid-template-columns:repeat(3, 70px);
+      gap:12px;
+      justify-content:center;
+    }
+
+    .btn{
+      width:70px;
+      height:70px;
+      border-radius:50%;
+      border:none;
+      cursor:pointer;
+      font-size:24px;
+      font-weight:bold;
+      color:white;
+      background:
+        linear-gradient(145deg, #666, #2e2e2e);
+      box-shadow:
+        4px 4px 10px #000,
+        inset -2px -2px 5px rgba(255,255,255,0.2);
+      transition:0.15s;
+    }
+
+    .btn:hover{
+      transform:scale(1.05);
+    }
+
+    .btn:active{
+      transform:scale(0.95);
+    }
+
+    .action{
+      background:
+        linear-gradient(145deg, #0c7c3d, #064d24);
+    }
+
+    .clear{
+      background:
+        linear-gradient(145deg, #8a1e1e, #4d0808);
+    }
+
+    .message{
+      color:white;
+      height:20px;
+      font-size:15px;
+      text-align:center;
+    }
+
+    .open{
+      animation:openSafe 1.2s ease forwards;
+    }
+
+    @keyframes openSafe{
+      0%{
+        transform:rotate(0deg);
+      }
+      100%{
+        transform:rotate(-25deg) translateX(120px);
+      }
+    }
+
+    @keyframes shake{
+      0%{ transform:translateX(0); }
+      25%{ transform:translateX(-8px); }
+      50%{ transform:translateX(8px); }
+      75%{ transform:translateX(-8px); }
+      100%{ transform:translateX(0); }
+    }
+
+    /* MODAL */
+
+    .modal{
+      position:fixed;
+      inset:0;
+      background:rgba(0,0,0,0.75);
+      display:flex;
+      justify-content:center;
+      align-items:center;
+      opacity:0;
+      pointer-events:none;
+      transition:0.4s;
+    }
+
+    .modal.show{
+      opacity:1;
+      pointer-events:auto;
+    }
+
+    .modal-box{
+      width:350px;
+      background:#1f1f1f;
+      border:2px solid #00ff90;
+      border-radius:20px;
+      padding:30px;
+      text-align:center;
+      color:white;
+      box-shadow:0 0 30px rgba(0,255,144,0.4);
+      animation:zoom 0.4s ease;
+    }
+
+    @keyframes zoom{
+      from{
+        transform:scale(0.5);
+        opacity:0;
+      }
+      to{
+        transform:scale(1);
+        opacity:1;
+      }
+    }
+
+    .modal-box h2{
+      color:#00ff90;
+      margin-bottom:15px;
+      font-size:30px;
+    }
+
+    .modal-box p{
+      margin-bottom:25px;
+      font-size:18px;
+    }
+
+    .close-btn{
+      padding:12px 25px;
+      border:none;
+      border-radius:10px;
+      background:#00aa66;
+      color:white;
+      font-size:16px;
+      cursor:pointer;
+      transition:0.2s;
+    }
+
+    .close-btn:hover{
+      background:#00cc7a;
+    }
+
+  </style>
+</head>
+
+<body>
+
+<audio id="successSound">
+  <source 
+    src="audio/sucesso.mp3" 
+    type="audio/mp3"
+  >
+</audio>
+
+<audio id="errorSound">
+  <source 
+    src="audio/erro.mp3" 
+    type="audio/mp3"
+  >
+</audio>
+
+  <div class="safe" id="safe">
+    <div class="panel">
+
+      <div class="title">
+        COFRE TIMER
+      <br>
+      <a id="timer" >00:00:00</a>
+      </div>
+      
+
+      <input 
+        type="password"
+        id="display"
+        class="display"
+        maxlength="8"
+        readonly
+      >
+
+      <div class="keyboard">
+        <button class="btn" onclick="addNumber('1')">1</button>
+        <button class="btn" onclick="addNumber('2')">2</button>
+        <button class="btn" onclick="addNumber('3')">3</button>
+
+        <button class="btn" onclick="addNumber('4')">4</button>
+        <button class="btn" onclick="addNumber('5')">5</button>
+        <button class="btn" onclick="addNumber('6')">6</button>
+
+        <button class="btn" onclick="addNumber('7')">7</button>
+        <button class="btn" onclick="addNumber('8')">8</button>
+        <button class="btn" onclick="addNumber('9')">9</button>
+
+        <button class="btn clear" onclick="clearDisplay()">X</button>
+        <button class="btn" onclick="addNumber('0')">0</button>
+        <button class="btn action" onclick="checkPassword()">✓</button>
+      </div>
+
+      <div class="message" id="message"></div>
+
+    </div>
+  </div>
+
+  <!-- MODAL -->
+  <div class="modal" id="successModal">
+    <div class="modal-box">
+      <h2>🔓 ACESSO LIBERADO</h2>
+      <br>
+      <img class="senku" src="img/senku.png"></img>
+      <p>
+        O cofre foi desbloqueado com sucesso.
+      </p>
+      <a href="Cofre.html">
+      <button class="close-btn" onclick="closeModal()">
+        Fechar
+      </button>
+      </a>
+    </div>
+  </div>
+
+  <script>
+
+    // SENHA FIXA
+    const senhaCorreta = "11111111";
+
+    const successSound = document.getElementById("successSound");
+    const errorSound = document.getElementById("errorSound");
+
+    const display = document.getElementById("display");
+    const message = document.getElementById("message");
+    const safe = document.getElementById("safe");
+    const modal = document.getElementById("successModal");
+     //Timer
+    let segundos = 0;
+    let timerAtivo = true;
+
+    function atualizarTimer(){
+
+      segundos++;
+
+      let min = String(Math.floor(segundos / 60)).padStart(2, '0');
+      let seg = String(segundos % 60).padStart(2, '0');
+
+      document.getElementById("timer").textContent =
+        `00:${min}:${seg}`;
+    }
+
+    const timer = setInterval(() => {
+
+      if(timerAtivo){
+        atualizarTimer();
+      }
+
+    }, 1000);
+    //fim timer
+
+    function addNumber(num){
+      if(display.value.length < 8){
+        display.value += num;
+      }
+    }
+
+    function clearDisplay(){
+      display.value = "";
+      message.textContent = "";
+    }
+
+    function checkPassword(){
+
+      if(display.value.length !== 8){
+
+        message.style.color = "#ffcc00";
+        message.textContent = "Digite 8 dígitos";
+
+        return;
+      }
+
+      if(display.value === senhaCorreta){
+
+        message.style.color = "#00ff90";
+        message.textContent = "Cofre desbloqueado!";
+
+        safe.classList.add("open");
+
+        // ABRIR MODAL
+        setTimeout(() => {
+          modal.classList.add("show");
+        }, 1000);
+        successSound.play();
+        timerAtivo = false;
+
+      }else{
+         errorSound.play();
+        message.style.color = "#ff4d4d";
+        message.textContent = "Senha incorreta";
+
+        display.value = "";
+
+        safe.style.animation = "shake 0.3s";
+       
+
+        setTimeout(() => {
+          safe.style.animation = "";
+        }, 300);
+      }
+    }
+
+    function closeModal(){
+      modal.classList.remove("show");
+    }
+    
+
+  </script>
+
+</body>
+</html>
